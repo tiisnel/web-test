@@ -69,82 +69,38 @@
 						
 						';
 						
-						$minyear=mysqli_query($link, "SELECT MIN(YEAR(STR_TO_DATE(`Kuupäev`,'%d.%m.%Y')))FROM `linnud` WHERE YEAR(STR_TO_DATE(`Kuupäev`,'%d.%m.%Y')) >0");
-						$minyear=mysqli_fetch_row($minyear);
 						
-						$maxyear=mysqli_query($link, "SELECT MAX(YEAR(STR_TO_DATE(`Kuupäev`,'%d.%m.%Y')))FROM `linnud`");
-						$maxyear=mysqli_fetch_row($maxyear);
+						$stat = mysqli_query($link, "SELECT  DISTINCT YEAR(`Kuupäev`), COUNT(`Liik`), MIN(`Tiiva pikkus`), AVG(`Tiiva pikkus`), MAX(`Tiiva pikkus`), MIN(`Mass`), AVG(`Mass`), MAX(`Mass`) 
+						FROM `linnud` WHERE `Liik` = '".$_POST["liik"]. "' GROUP BY YEAR(`Kuupäev`) WITH ROLLUP" ); 
 						
-						for($year = $minyear[0]; $year<=$maxyear[0]; $year++){
-							echo "<tr> ";
-							echo"<th>$year</th>";
+						$nr = mysqli_num_rows($stat);
+						
+						while($uuri = mysqli_fetch_array($stat)){ 
 							
-							$linde = mysqli_query($link, "SELECT COUNT(*) FROM `linnud` WHERE `Liik` = '".$_POST["liik"]."' AND YEAR(STR_TO_DATE(`Kuupäev`,'%d.%m.%Y'))=".$year);
-							$linde = mysqli_fetch_row($linde);
-							echo"<td>$linde[0]</td>";
 							
-							$mintiib = mysqli_query($link, "SELECT MIN(`Tiiva pikkus`) FROM `linnud` WHERE `Liik` = '".$_POST["liik"]."' AND `Tiiva pikkus` >0 AND YEAR(STR_TO_DATE(`Kuupäev`,'%d.%m.%Y'))=".$year);
-							$mintiib = mysqli_fetch_row($mintiib);		
-							echo"<td>$mintiib[0]</td>";
+						    echo "<tr> ";
+						    $uuri[0] = !empty($uuri[0]) ? $uuri[0] : 'Kokku'; 
+							echo"<th>" .$uuri[0]. "</th>";
+							echo"<td>" .$uuri[1]. "</td>"; // lindude arv
 							
-							$tiib = mysqli_query($link, "SELECT AVG(`Tiiva pikkus`) FROM `linnud` WHERE `Liik` = '".$_POST["liik"]."' AND `Tiiva pikkus` >0 AND YEAR(STR_TO_DATE(`Kuupäev`,'%d.%m.%Y'))=".$year);
-							$tiib = mysqli_fetch_row($tiib);
-							echo"<td>$tiib[0]</td>";
+							echo"<td>$uuri[2]</td>"; // tiivapikkus min/avg/max
+							$uuri[3] = !empty($uuri[3]) ? round($uuri[3],2) : ''; 
+							echo"<td>$uuri[3]</td>"; 
+							echo"<td>$uuri[4]</td>"; 
 							
-							$maxtiib = mysqli_query($link, "SELECT MAX(`Tiiva pikkus`) FROM `linnud` WHERE `Liik` = '".$_POST["liik"]."' AND `Tiiva pikkus` >0 AND YEAR(STR_TO_DATE(`Kuupäev`,'%d.%m.%Y'))=".$year);
-							$maxtiib = mysqli_fetch_row($maxtiib);
-							echo"<td>$maxtiib[0]</td>";
+							echo"<td>$uuri[5]</td>"; //Kaal min/avg/max
+							$uuri[6] = !empty($uuri[6]) ? round($uuri[6],2) : ''; 
+							echo"<td>$uuri[6]</td>"; 
+							echo"<td>$uuri[7]</td>"; 
 							
-							$minmass = mysqli_query($link, "SELECT MIN(`Mass`) FROM `linnud` WHERE `Liik` = '".$_POST["liik"]."' AND `Mass` >0 AND YEAR(STR_TO_DATE(`Kuupäev`,'%d.%m.%Y'))=".$year);
-							$minmass = mysqli_fetch_row($minmass);
-							echo"<td>$minmass[0]</td>";
-							
-							$mass = mysqli_query($link, "SELECT AVG(`Mass`) FROM `linnud` WHERE `Liik` = '".$_POST["liik"]."' AND `Mass` >0 AND YEAR(STR_TO_DATE(`Kuupäev`,'%d.%m.%Y'))=".$year);
-							$mass = mysqli_fetch_row($mass);
-							echo"<td>$mass[0]</td>";
-							
-							$maxmass = mysqli_query($link, "SELECT MAX(`Mass`) FROM `linnud` WHERE `Liik` = '".$_POST["liik"]."' AND `Mass` >0 AND YEAR(STR_TO_DATE(`Kuupäev`,'%d.%m.%Y'))=".$year);
-							$maxmass = mysqli_fetch_row($maxmass);
-							echo"<td>$maxmass[0]</td>";
 							echo"</tr>";
 							
+						    
 						}
-						echo "<tr> ";
-						echo"<th>Kokku</th>";
-						
-						$linde = mysqli_query($link, "SELECT COUNT(*) FROM `linnud` WHERE `Liik` = '".$_POST["liik"]."'");
-						$linde = mysqli_fetch_row($linde);
-						echo"<td>$linde[0]</td>";
-						
-						$mintiib = mysqli_query($link, "SELECT MIN(`Tiiva pikkus`) FROM `linnud` WHERE `Liik` = '".$_POST["liik"]."' AND `Tiiva pikkus` >0");
-						$mintiib = mysqli_fetch_row($mintiib);		
-						echo"<td>$mintiib[0]</td>";
-						
-						$tiib = mysqli_query($link, "SELECT AVG(`Tiiva pikkus`) FROM `linnud` WHERE `Liik` = '".$_POST["liik"]."' AND `Tiiva pikkus` >0");
-						$tiib = mysqli_fetch_row($tiib);
-						echo"<td>$tiib[0]</td>";
-						
-						$maxtiib = mysqli_query($link, "SELECT MAX(`Tiiva pikkus`) FROM `linnud` WHERE `Liik` = '".$_POST["liik"]."' AND `Tiiva pikkus` >0");
-						$maxtiib = mysqli_fetch_row($maxtiib);
-						echo"<td>$maxtiib[0]</td>";
-						
-						$minmass = mysqli_query($link, "SELECT MIN(`Mass`) FROM `linnud` WHERE `Liik` = '".$_POST["liik"]."' AND `Mass` >0");
-						$minmass = mysqli_fetch_row($minmass);
-						echo"<td>$minmass[0]</td>";
-						
-						$mass = mysqli_query($link, "SELECT AVG(`Mass`) FROM `linnud` WHERE `Liik` = '".$_POST["liik"]."' AND `Mass` >0");
-						$mass = mysqli_fetch_row($mass);
-						echo"<td>$mass[0]</td>";
-						
-						$maxmass = mysqli_query($link, "SELECT MAX(`Mass`) FROM `linnud` WHERE `Liik` = '".$_POST["liik"]."' AND `Mass` >0");
-						$maxmass = mysqli_fetch_row($maxmass);
-						echo"<td>$maxmass[0]</td>";
-						echo"</tr>";
-						
-						mysqli_close($link); 
 						echo "</tbody>";
+						mysqli_close($link); 
 						
-					}		
+					}
 				?>
 			</div>
 		</body>
